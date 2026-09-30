@@ -40,10 +40,10 @@ jobs:
       - name: Reconstruct Velara source bundle
         shell: bash
         run: |
-          cat archive-parts/??? > /tmp/velara-source.tar.gz.b64
-          base64 -d /tmp/velara-source.tar.gz.b64 > /tmp/velara-source.tar.gz
-          echo "ed9139826748c9ccdba3451f658f9e9ee7a04f767ce068bad1ff925adc968553  /tmp/velara-source.tar.gz" | sha256sum -c -
-          tar -xzf /tmp/velara-source.tar.gz
+          cat xz-parts/??? > /tmp/velara-source.tar.xz.b64
+          base64 -d /tmp/velara-source.tar.xz.b64 > /tmp/velara-source.tar.xz
+          echo "579a00ce16e733950a439461e74698c244da2e161c399e7bd80839c089914b56  /tmp/velara-source.tar.xz" | sha256sum -c -
+          tar -xJf /tmp/velara-source.tar.xz
           test -d "${{ matrix.path }}"
           echo "Source reconstructed and checksum verified."
 
