@@ -40,11 +40,12 @@ jobs:
       - name: Reconstruct Velara source bundle
         shell: bash
         run: |
-          cat source-parts/part* > /tmp/velara-source.tar.gz.b64
+          cat archive-parts/??? > /tmp/velara-source.tar.gz.b64
           base64 -d /tmp/velara-source.tar.gz.b64 > /tmp/velara-source.tar.gz
+          echo "ed9139826748c9ccdba3451f658f9e9ee7a04f767ce068bad1ff925adc968553  /tmp/velara-source.tar.gz" | sha256sum -c -
           tar -xzf /tmp/velara-source.tar.gz
           test -d "${{ matrix.path }}"
-          echo "Source reconstructed."
+          echo "Source reconstructed and checksum verified."
 
       - name: Set up Java ${{ matrix.java }}
         uses: actions/setup-java@v6
