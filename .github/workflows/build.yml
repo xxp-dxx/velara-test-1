@@ -1,0 +1,71 @@
+name: Build Velara
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Fabric 1.21.11
+            path: Velara_Mod/1.21.11-fabric
+            java: '21'
+            gradle: '8.14.4'
+          - name: Forge 1.21.11
+            path: Velara_Mod/1.21.11-forge
+            java: '21'
+            gradle: '8.14.4'
+          - name: Fabric 26.3
+            path: Velara_Mod/26.3-fabric
+            java: '25'
+            gradle: '9.6.0'
+          - name: Forge 26.3
+            path: Velara_Mod/26.3-forge
+            java: '25'
+            gradle: '9.6.0'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Reconstruct Velara source bundle
+        shell: bash
+        run: |
+          cat source-parts/part* > /tmp/velara-source.tar.gz.b64
+          base64 -d /tmp/velara-source.tar.gz.b64 > /tmp/velara-source.tar.gz
+          tar -xzf /tmp/velara-source.tar.gz
+          test -d "${{ matrix.path }}"
+          echo "Source reconstructed."
+
+      - name: Set up Java ${{ matrix.java }}
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Set up Gradle ${{ matrix.gradle }}
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: ${{ matrix.gradle }}
+
+      - name: Build
+        working-directory: ${{ matrix.path }}
+        run: gradle clean build --no-daemon
+
+      - name: Upload JAR artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: velara-${{ matrix.name }}
+          path: ${{ matrix.path }}/build/libs/*.jar
+          if-no-files-found: warn
+          retention-days: 14
